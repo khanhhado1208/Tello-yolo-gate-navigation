@@ -48,22 +48,53 @@ src/my_tello_vision/my_tello_vision/tello_vision_control.py
 - cv_bridge
 - Ultralytics YOLO
 - Tello ROS 2 driver
+- DJI/Ryze Tello drone
+
+## Clone
+
+```bash
+git clone https://github.com/khanhhado1208/Tello-yolo-gate-navigation.git
+cd Tello-yolo-gate-navigation
+```
 
 ## Build
 
 ```bash
-cd ~/ros2_ws
 colcon build
 source install/setup.bash
 ```
 
 ## Run
 
+First, connect your computer to the Tello Wi-Fi network.
+
+Then start the Tello driver in one terminal:
+
 ```bash
+source install/setup.bash
+ros2 launch tello_driver tello_driver.launch.py
+```
+
+In another terminal, run the vision controller:
+
+```bash
+source install/setup.bash
 ros2 run my_tello_vision tello_vision_control
 ```
+## Reliability Notes
+
+This project was tested on a low-cost DJI/Ryze Tello drone in an indoor gate course. Flight behavior can vary between runs because of battery level, motor temperature, Wi-Fi/video latency, lighting, and accumulated drift after each gate.
+
+A fully charged battery may make the drone more aggressive because the same velocity commands can produce stronger movement. After several retries, the drone may behave more smoothly as battery voltage drops, but very low battery can also cause altitude sag.
+
+For best repeatability:
+
+- Use consistent battery level during testing
+- Keep lighting and gate placement unchanged
+- Let the drone stabilize before each run
+- Avoid over-tuning for one single successful attempt
+- Use moderate speeds and loose gate-center tolerance instead of strict centering
 
 ## Notes
 
-This project was tested on a low-cost Tello drone, so the controller uses soft PID limits, loose gate-center tolerance, and moderate forward speed for stable gate passing.
-
+The controller is tuned for a simple indoor gate course with four gates and a stop sign. Performance may change depending on the physical setup and Tello flight conditions.
