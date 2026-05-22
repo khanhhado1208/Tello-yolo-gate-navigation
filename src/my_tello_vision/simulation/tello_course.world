@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <name>gate_1</name>
+      <uri>model://tello_gate</uri>
+      <pose>2.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </include>
+
+    <include>
+      <name>gate_2</name>
+      <uri>model://tello_gate</uri>
+      <pose>5.0 0.0 0.0 0.0 0.0 0.0</pose>
+    </include>
+
+    <include>
+      <name>gate_3</name>
+      <uri>model://tello_gate</uri>
+      <pose>8.0 2.0 0.0 0.0 0.0 1.5708</pose>
+    </include>
+
+    <include>
+      <name>gate_4</name>
+      <uri>model://tello_gate</uri>
+      <pose>8.0 5.0 0.0 0.0 0.0 1.5708</pose>
+    </include>
+
+    <include>
+      <name>stop_sign</name>
+      <uri>model://stop_sign</uri>
+      <pose>8.0 7.0 0.0 0.0 0.0 0.0</pose>
+    </include>
+
+    <physics type="ode">
+      <real_time_update_rate>1000.0</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>150</iters>
+          <precon_step_size>0.0</precon_step_size>
+          <sor>1.400000</sor>
+        </solver>
+      </ode>
+    </physics>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+  </world>
+</sdf>

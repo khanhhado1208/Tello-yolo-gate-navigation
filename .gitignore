@@ -1,0 +1,11 @@
+build/
+install/
+log/
+__pycache__/
+*.pyc
+.DS_Store
+.cache/
+*.bag
+*.db3
+*.avi
+*.mov
