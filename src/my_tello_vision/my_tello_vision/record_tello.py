@@ -6,12 +6,17 @@ from ultralytics import YOLO
 import cv2
 import datetime
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+import os
 
 class TelloYoloRecorder(Node):
     def __init__(self):
         super().__init__('tello_yolo_recorder')
         self.bridge = CvBridge()
-        self.model = YOLO('/home/mahmmudqatmh/ros2_ws/src/my_tello_vision/models/best.pt')
+
+        model_path = os.path.expanduser(
+            '~/ros2_ws/src/tello-yolo-gate-navigation/src/my_tello_vision/models/best.pt'
+        )
+        self.model = YOLO(model_path)
         
         # MATCH THE TELLO DRIVER QoS
         qos = QoSProfile(
