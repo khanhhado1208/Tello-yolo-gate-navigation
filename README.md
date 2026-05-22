@@ -21,13 +21,21 @@ Full demo: [tello_gate_navigation_demo.mp4](media/tello_gate_navigation_demo.mp4
   - Brake
   - Recovery
   - Land
+- Demo recording of the drone flying through all gates and stopping at the stop sign
 
 ## Project Structure
 
 ```text
 src/
 ├── my_tello_vision/
-└── tello_ros2_humble_driver/
+│   ├── launch/              # ROS 2 launch files
+│   ├── models/              # YOLO weights (best.pt)
+│   ├── my_tello_vision/     # Core Python logic: FSM, PID, vision control
+│   ├── simulation/          # Gazebo world/course files
+│   ├── package.xml          # ROS 2 package metadata
+│   └── setup.py             # Python package setup and entry points
+├── tello_ros2_humble_driver/
+│   └── tello_ros/           # Tello driver, messages, and Gazebo support
 media/
 ├── tello_gate_navigation_preview.gif
 └── tello_gate_navigation_demo.mp4
@@ -50,37 +58,107 @@ src/my_tello_vision/my_tello_vision/tello_vision_control.py
 - Tello ROS 2 driver
 - DJI/Ryze Tello drone
 
-## Clone
+Install Python dependencies:
 
 ```bash
+pip install ultralytics opencv-python
+```
+
+Install Tello driver dependency:
+
+```bash
+sudo apt install libh264-dev
+```
+
+## Clone
+
+Clone this repository into a ROS 2 workspace:
+
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
 git clone https://github.com/khanhhado1208/Tello-yolo-gate-navigation.git
-cd Tello-yolo-gate-navigation
 ```
 
 ## Build
 
 ```bash
+cd ~/ros2_ws
 colcon build
 source install/setup.bash
 ```
 
-## Run
+## Running the Mission
 
-First, connect your computer to the Tello Wi-Fi network.
+Open a new terminal for each step.
 
-Then start the Tello driver in one terminal:
+### Step 1: Connect to Tello Wi-Fi
+
+Power on the DJI/Ryze Tello drone, then connect your computer to the drone’s Wi-Fi network.
+
+### Step 2: Launch the Tello Driver
 
 ```bash
+cd ~/ros2_ws
 source install/setup.bash
 ros2 launch tello_driver tello_driver.launch.py
 ```
 
-In another terminal, run the vision controller:
+If the launch file name is different in your driver version, check available launch files with:
 
 ```bash
+find src/tello_ros2_humble_driver -name "*.launch.py"
+```
+
+### Step 3: Run the Autonomous Vision Controller
+
+```bash
+cd ~/ros2_ws
 source install/setup.bash
 ros2 run my_tello_vision tello_vision_control
 ```
+
+### Optional: Record the Tello Camera Stream
+
+```bash
+cd ~/ros2_ws
+source install/setup.bash
+ros2 run my_tello_vision record_tello
+```
+
+## Navigation Logic
+
+The drone uses a finite state machine for autonomous gate navigation.
+
+1. **SEARCH**  
+   Searches for the next gate or stop sign using the camera feed and YOLO detections.
+
+2. **ALIGN**  
+   Uses PID control to align the drone with the detected gate center.
+
+3. **PENETRATE**  
+   Moves forward through the gate with a small upward command to reduce altitude sag.
+
+4. **BRAKE**  
+   Applies a short braking motion after passing a gate.
+
+5. **RECOVERY**  
+   Uses the last known target direction if the gate is temporarily lost.
+
+6. **LAND**  
+   Approaches and lands after detecting the stop sign.
+
+## Control Strategy
+
+The controller combines:
+
+- YOLO-based gate and stop-sign detection
+- PID yaw correction for horizontal alignment
+- PID altitude correction for vertical alignment
+- Forward velocity control for gate approach
+- A finite state machine for mission sequencing
+- Conservative speed and tolerance values for low-cost Tello flight stability
+
 ## Reliability Notes
 
 This project was tested on a low-cost DJI/Ryze Tello drone in an indoor gate course. Flight behavior can vary between runs because of battery level, motor temperature, Wi-Fi/video latency, lighting, and accumulated drift after each gate.
