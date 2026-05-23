@@ -7,8 +7,8 @@ Autonomous ROS 2 vision-based navigation for a DJI/Ryze Tello drone using YOLO g
 Real indoor test course used during validation.
 
 <p align="center">
-  <img src="docs/images/course_front.jpeg" width="45%">
-  <img src="docs/images/course_side.jpeg" width="45%">
+  <img src="docs/images/course_front.jpeg" width="400" height="250">
+  <img src="docs/images/course_side.jpeg" width="400" height="250">
 </p>
 
 Gate sequence:
