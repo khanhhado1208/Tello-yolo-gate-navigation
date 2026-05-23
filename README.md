@@ -7,8 +7,8 @@ Autonomous ROS 2 vision-based navigation for a DJI/Ryze Tello drone using YOLO g
 Real indoor test course used during validation.
 
 <p align="center">
-  <img src="docs/images/course_front.jpg" width="45%">
-  <img src="docs/images/course_side.jpg" width="45%">
+  <img src="docs/images/course_front.jpeg" width="45%">
+  <img src="docs/images/course_side.jpeg" width="45%">
 </p>
 
 Gate sequence:
@@ -31,7 +31,7 @@ The physical setup includes real-world constraints:
 The system uses YOLO-based gate detection during autonomous navigation. The drone camera stream is processed in real time to identify racing gates and guide alignment.
 
 <p align="center">
-  <img src="docs/images/yolo_detection_demo.jpg" width="700">
+  <img src="docs/images/yolo_detection_demo.jpeg" width="700">
 </p>
 
 Example output showing multiple gate detections in a real indoor test environment.
