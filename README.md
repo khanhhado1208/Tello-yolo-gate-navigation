@@ -2,40 +2,81 @@
 
 Autonomous ROS 2 vision-based navigation for a DJI/Ryze Tello drone using YOLO gate detection and PID control.
 
+## Physical Test Environment
+
+Real indoor test course used during validation.
+
+<p align="center">
+  <img src="docs/images/course_front.jpg" width="45%">
+  <img src="docs/images/course_side.jpg" width="45%">
+</p>
+
+Gate sequence:
+
+1. Square gate
+2. Circular gate
+3. Square gate
+4. Circular gate
+
+The physical setup includes real-world constraints:
+
+- Indoor lighting variation
+- Background clutter
+- Safety net enclosure
+- Gate angle variation
+- Flight drift and battery-dependent behavior
+
+## Real-Time Gate Detection
+
+The system uses YOLO-based gate detection during autonomous navigation. The drone camera stream is processed in real time to identify racing gates and guide alignment.
+
+<p align="center">
+  <img src="docs/images/yolo_detection_demo.jpg" width="700">
+</p>
+
+Example output showing multiple gate detections in a real indoor test environment.
+
 ## Demo
 
 ![Tello gate navigation preview](media/tello_gate_navigation_preview.gif)
 
-Full demo: [tello_gate_navigation_demo.mp4](media/tello_gate_navigation_demo.mp4)
+Full demo:
+
+[tello_gate_navigation_demo.mp4](media/tello_gate_navigation_demo.mp4)
 
 ## Features
 
 - ROS 2 Humble
 - Tello drone control using `/cmd_vel`
-- YOLO gate and stop-sign detection
-- PID-based yaw and altitude alignment
-- Finite State Machine:
-  - Search
-  - Align
-  - Penetrate gate
-  - Brake
-  - Recovery
-  - Land
-- Demo recording of the drone flying through all gates and stopping at the stop sign
+- YOLO-based gate and stop-sign detection
+- PID yaw and altitude alignment
+- Finite State Machine navigation
+- Autonomous gate penetration
+- Recovery logic after temporary target loss
+- Real-world indoor testing
+- Demo recording through all gates
 
 ## Project Structure
 
 ```text
 src/
 ├── my_tello_vision/
-│   ├── launch/              # ROS 2 launch files
-│   ├── models/              # YOLO weights (best.pt)
-│   ├── my_tello_vision/     # Core Python logic: FSM, PID, vision control
-│   ├── simulation/          # Gazebo world/course files
-│   ├── package.xml          # ROS 2 package metadata
-│   └── setup.py             # Python package setup and entry points
+│   ├── launch/
+│   ├── models/
+│   ├── my_tello_vision/
+│   ├── simulation/
+│   ├── package.xml
+│   └── setup.py
+│
 ├── tello_ros2_humble_driver/
-│   └── tello_ros/           # Tello driver, messages, and Gazebo support
+│   └── tello_ros/
+
+docs/
+└── images/
+    ├── course_front.jpg
+    ├── course_side.jpg
+    └── yolo_detection_demo.jpg
+
 media/
 ├── tello_gate_navigation_preview.gif
 └── tello_gate_navigation_demo.mp4
@@ -64,7 +105,7 @@ Install Python dependencies:
 pip install ultralytics opencv-python
 ```
 
-Install Tello driver dependency:
+Install dependency:
 
 ```bash
 sudo apt install libh264-dev
@@ -72,11 +113,11 @@ sudo apt install libh264-dev
 
 ## Clone
 
-Clone this repository into a ROS 2 workspace:
-
 ```bash
 mkdir -p ~/ros2_ws/src
+
 cd ~/ros2_ws/src
+
 git clone https://github.com/khanhhado1208/Tello-yolo-gate-navigation.git
 ```
 
@@ -84,7 +125,9 @@ git clone https://github.com/khanhhado1208/Tello-yolo-gate-navigation.git
 
 ```bash
 cd ~/ros2_ws
+
 colcon build
+
 source install/setup.bash
 ```
 
@@ -92,87 +135,115 @@ source install/setup.bash
 
 Open a new terminal for each step.
 
-### Step 1: Connect to Tello Wi-Fi
+### Step 1 — Connect to Tello Wi-Fi
 
-Power on the DJI/Ryze Tello drone, then connect your computer to the drone’s Wi-Fi network.
+Power on the DJI/Ryze Tello drone.
 
-### Step 2: Launch the Tello Driver
+Connect the computer to the Tello Wi-Fi network.
+
+### Step 2 — Launch Driver
 
 ```bash
 cd ~/ros2_ws
+
 source install/setup.bash
+
 ros2 launch tello_driver tello_driver.launch.py
 ```
 
-If the launch file name is different in your driver version, check available launch files with:
+If needed:
 
 ```bash
 find src/tello_ros2_humble_driver -name "*.launch.py"
 ```
 
-### Step 3: Run the Autonomous Vision Controller
+### Step 3 — Run Autonomous Navigation
 
 ```bash
 cd ~/ros2_ws
+
 source install/setup.bash
+
 ros2 run my_tello_vision tello_vision_control
 ```
 
-### Optional: Record the Tello Camera Stream
+### Optional — Record Camera Stream
 
 ```bash
 cd ~/ros2_ws
+
 source install/setup.bash
+
 ros2 run my_tello_vision record_tello
 ```
 
 ## Navigation Logic
 
-The drone uses a finite state machine for autonomous gate navigation.
+The controller uses a finite state machine.
 
-1. **SEARCH**  
-   Searches for the next gate or stop sign using the camera feed and YOLO detections.
+### SEARCH
 
-2. **ALIGN**  
-   Uses PID control to align the drone with the detected gate center.
+Searches for gates or stop signs.
 
-3. **PENETRATE**  
-   Moves forward through the gate with a small upward command to reduce altitude sag.
+### ALIGN
 
-4. **BRAKE**  
-   Applies a short braking motion after passing a gate.
+Uses PID control to align the drone with the detected gate center.
 
-5. **RECOVERY**  
-   Uses the last known target direction if the gate is temporarily lost.
+### PENETRATE
 
-6. **LAND**  
-   Approaches and lands after detecting the stop sign.
+Moves forward through the gate while compensating altitude loss.
+
+### BRAKE
+
+Applies short braking after gate penetration.
+
+### RECOVERY
+
+Uses previous target direction if detections are temporarily lost.
+
+### LAND
+
+Performs landing after stop-sign detection.
 
 ## Control Strategy
 
 The controller combines:
 
-- YOLO-based gate and stop-sign detection
-- PID yaw correction for horizontal alignment
-- PID altitude correction for vertical alignment
-- Forward velocity control for gate approach
-- A finite state machine for mission sequencing
-- Conservative speed and tolerance values for low-cost Tello flight stability
+- YOLO-based gate detection
+- Stop-sign detection
+- PID yaw correction
+- PID altitude correction
+- Forward velocity control
+- Finite State Machine mission sequencing
+- Conservative control tuning for low-cost drone stability
 
 ## Reliability Notes
 
-This project was tested on a low-cost DJI/Ryze Tello drone in an indoor gate course. Flight behavior can vary between runs because of battery level, motor temperature, Wi-Fi/video latency, lighting, and accumulated drift after each gate.
+This project was tested on a low-cost DJI/Ryze Tello drone in a real indoor gate course.
 
-A fully charged battery may make the drone more aggressive because the same velocity commands can produce stronger movement. After several retries, the drone may behave more smoothly as battery voltage drops, but very low battery can also cause altitude sag.
+Flight behavior can vary because of:
 
-For best repeatability:
+- Battery level
+- Motor temperature
+- Wi-Fi latency
+- Video latency
+- Lighting conditions
+- Drift accumulation
 
-- Use consistent battery level during testing
-- Keep lighting and gate placement unchanged
-- Let the drone stabilize before each run
-- Avoid over-tuning for one single successful attempt
-- Use moderate speeds and loose gate-center tolerance instead of strict centering
+A fully charged battery can produce stronger motion for identical velocity commands.
+
+Battery discharge may slightly smooth flight behavior but excessive discharge can also reduce altitude stability.
+
+For repeatability:
+
+- Use consistent battery level
+- Keep gate placement unchanged
+- Maintain stable lighting
+- Avoid over-tuning for a single successful run
+- Prefer moderate speeds over aggressive control gains
 
 ## Notes
 
-The controller is tuned for a simple indoor gate course with four gates and a stop sign. Performance may change depending on the physical setup and Tello flight conditions.
+The controller was designed for a four-gate indoor course with a final stop sign target.
+
+Performance depends on environmental conditions and Tello flight limitations.
